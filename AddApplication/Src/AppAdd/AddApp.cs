@@ -25,6 +25,7 @@ namespace AddApplication.Src.AppAdd
             _formAppAdd = formAppAdd;
             _apiAddApp = new ApiAddApp();
             _httpApi = new HttpApi();
+
         }
 
         public void MakeButtonVisible(Button button)
