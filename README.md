@@ -1,9 +1,10 @@
 # ApkCenter Admin Panel
+this is a learning project, hope i can learn from you :)
 
 Admin panel for apk center app
 about this project more but this essentially a project to build a non addictive android device and a child safe enviroment
 
-(this application will been used in the future, and so any issue is a big consern)
+
 
 
 Contact
