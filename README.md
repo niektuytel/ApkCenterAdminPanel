@@ -11,5 +11,4 @@ Contact
 If you have any questions you can contact me:
 - Discord: `Okido#3690`
 - Whatsapp: `+31618395668`
-- Email: `tuytelniek@gmail.com`
 - Stackoverflow: `https://stackoverflow.com/users/13361987`
