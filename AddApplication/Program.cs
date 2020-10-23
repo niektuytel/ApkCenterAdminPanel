@@ -5,11 +5,6 @@ using System.Windows.Forms;
 namespace AddApplication
 {
 
-    // NOTE: the code will never be perfect + it is a learning project 
-    // so feel free to change the code and commit push it to github.
-
-    // thanks, Niek Tuytel
-
     static class Program
     {
 
