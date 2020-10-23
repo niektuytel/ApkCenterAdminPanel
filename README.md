@@ -6,7 +6,7 @@ about this project more but this essentially a project to build a non addictive 
 
 
 
-#Contact
+# Contact
 this is a learning project, hope i can learn from you :)
 
 If you have any questions you can contact me:
