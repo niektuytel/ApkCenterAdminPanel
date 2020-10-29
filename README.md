@@ -10,7 +10,7 @@ TODOS:
 - Auto Fill Add Application window when requested app display is visible 
 - Delete Application with auto fill of matched server applications
 
-
+Connected with https://github.com/niektuytel/ApkCenterApi/tree/master
 
 # Contact
 this is a learning project, hope i can learn from you :)
