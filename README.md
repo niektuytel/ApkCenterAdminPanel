@@ -3,6 +3,11 @@
 Admin panel for apk center app
 about this project more but this essentially a project to build a non addictive android device and a child safe enviroment
 
+TODOS:
+- Make Languages more flexible (add/edit/delete)
+- Add more websites to auto fill from
+- Auto Fill Add Application window when requested app display is visible 
+- Delete Application with auto fill of matched server applications
 
 
 
