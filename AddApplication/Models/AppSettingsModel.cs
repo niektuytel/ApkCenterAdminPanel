@@ -14,46 +14,46 @@ namespace AddApplication.Models
         }
 
 
-        public CategoryModel[] Categories { get; set; }
+        public Dictionary<string, Dictionary<string, string>> AllCategories { get; set; }
         public string[] Pegi { get; set; }
         public string[] Country { get; set; }
         public ApiTypeModel[] ApiTypes { get; set; }
 
 
-        public void UpdateCategories(CategoryModel addModel = null)
-        {
-            List<CategoryModel> newValues = new List<CategoryModel>();
-            bool founded = false;
+        //public void UpdateCategories(Dictionary<string, string> newCategory = null)
+        //{
+        //    List<CategoryModel> newValues = new List<CategoryModel>();
+        //    bool founded = false;
 
-            foreach (CategoryModel category in Categories)
-            {
-                if (category.Globally != "")
-                {
-                    // update value
-                    if(
-                        !founded && addModel != null && 
-                        addModel.Globally == category.Globally
-                    ){
-                        founded = true;
-                        category.Nederland = addModel.Nederland;
-                    }
+        //    foreach (CategoryModel category in Categories)
+        //    {
+        //        if (category.Globally != "")
+        //        {
+        //            // update value
+        //            if(
+        //                !founded && addModel != null && 
+        //                addModel.Globally == category.Globally
+        //            ){
+        //                founded = true;
+        //                category.Nederland = addModel.Nederland;
+        //            }
 
-                    newValues.Add(category);
-                }
-            }
+        //            newValues.Add(category);
+        //        }
+        //    }
 
-            // add new value
-            if(
-                !founded && addModel != null && 
-                addModel.Globally != null &&
-                addModel.Nederland != null
-            ){
-                newValues.Add(addModel);
-            }
+        //    // add new value
+        //    if(
+        //        !founded && addModel != null && 
+        //        addModel.Globally != null &&
+        //        addModel.Nederland != null
+        //    ){
+        //        newValues.Add(addModel);
+        //    }
 
-            Categories = _initializeHelper.Array<CategoryModel>(newValues.Count);
-            newValues.CopyTo(Categories);
-        }
+        //    Categories = _initializeHelper.Array<CategoryModel>(newValues.Count);
+        //    newValues.CopyTo(Categories);
+        //}
 
         public void UpdateApiTypes(ApiTypeModel addModel = null)
         {

@@ -2,19 +2,19 @@
 using System.Collections.Generic;
 using System.Windows.Forms;
 using AddApplication.Models;
-using AddApplication.Src.FormRequests;
+using AddApplication.Src.Http.Api;
 using AddApplication.Utils;
 
 namespace AddApplication.Src.AllForms
 {
     public partial class FormAppRequests: Form
     {
-        private readonly FormMain _formMain;
-        private readonly EditString _editString;
-        private readonly HttpApi _httpApi;
-        private readonly List<AppRequestModel> _requests;
-
+        private readonly List<AppRequestModel> _allRequests;
         private int _requestIndex = 0;
+
+        private readonly FormMain _formMain;
+        private readonly ApiRequest _apiRequest;
+
 
         public FormAppRequests(FormMain formMain)
         {
@@ -23,9 +23,9 @@ namespace AddApplication.Src.AllForms
             InitializeComponent();
 
             _formMain = formMain;
-            _editString = new EditString();
-            _httpApi = new HttpApi();
-            _requests = _httpApi.ApiGetRequests();
+            _apiRequest = new ApiRequest();
+
+            _allRequests = _apiRequest.GetAll();
 
             DisplayTxts();
             DisplayButtons();
@@ -47,15 +47,15 @@ namespace AddApplication.Src.AllForms
             }
             else if (id == "btnRemove")
             {
-                AppRequestModel requestModel = _requests[_requestIndex];
+                AppRequestModel requestModel = _allRequests[_requestIndex];
 
                 // api
-                _ = _httpApi.ApiRemoveRequest(requestModel);
+                _ = _apiRequest.Delete(requestModel);
 
                 // local
-                _requests.RemoveAt(_requestIndex);
+                _allRequests.RemoveAt(_requestIndex);
 
-                int maxIndex = (_requests.Count - 1);
+                int maxIndex = (_allRequests.Count - 1);
                 if (_requestIndex > maxIndex && _requestIndex > 0)
                 {
                     _requestIndex -= 1;
@@ -73,7 +73,7 @@ namespace AddApplication.Src.AllForms
 
         private void DisplayButtons()
         {
-            if (_requests.Count == 0)
+            if (_allRequests.Count == 0)
             {
                 btnPrevious.Visible = false;
                 btnRemove.Visible = false;
@@ -94,7 +94,7 @@ namespace AddApplication.Src.AllForms
             }
 
             // remove
-            if (_requestIndex < _requests.Count && _requestIndex >= 0)
+            if (_requestIndex < _allRequests.Count && _requestIndex >= 0)
             {
                 btnRemove.Visible = true;
             } else {
@@ -102,7 +102,7 @@ namespace AddApplication.Src.AllForms
             }
 
             // next
-            if ((_requestIndex + 1) > (_requests.Count - 1))
+            if ((_requestIndex + 1) > (_allRequests.Count - 1))
             {
                 btnNext.Visible = false;
             } else {
@@ -113,11 +113,11 @@ namespace AddApplication.Src.AllForms
 
         private void DisplayTxts()
         {
-            if (_requests.Count == 0) return;
+            if (_allRequests.Count == 0) return;
 
-            if (_requestIndex < _requests.Count && _requestIndex >= 0)
+            if (_requestIndex < _allRequests.Count && _requestIndex >= 0)
             {
-                AppRequestModel requestModel = _requests[_requestIndex];
+                AppRequestModel requestModel = _allRequests[_requestIndex];
 
                 lblRequestedTitle.Text = Create.AsUrlDeCoded(requestModel.Title);
                 lblRequestedTimes.Text = requestModel.RequestedTimes.ToString();

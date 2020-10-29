@@ -1,6 +1,4 @@
-﻿using AddApplication.Models;
-using AddApplication.Src.AllForms;
-using System;
+﻿using System;
 using System.Windows.Forms;
 
 namespace AddApplication.Src
@@ -24,7 +22,7 @@ namespace AddApplication.Src
             else if (form != null)
             {
                 (form as Form).Close();
-                form = default(T);
+                form = default;
             }
         }
 

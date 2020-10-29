@@ -1,6 +1,6 @@
-﻿using AddApplication.Utils;
+﻿using AddApplication.Src.Http.Api;
+using AddApplication.Utils;
 using System;
-using System.Web;
 using System.Windows.Forms;
 
 namespace AddApplication.Src.AllForms
@@ -8,17 +8,19 @@ namespace AddApplication.Src.AllForms
 
     public partial class FormAppRemove : Form
     {
+        //private readonly
+
         private readonly FormMain _formMain;
-        private readonly HttpApi _httpApi;
+        private readonly ApiApp _apiApp;
 
         public FormAppRemove(FormMain formMain)
         {
             Icon = Properties.Resources.logo21;
 
-            InitializeComponent();
-
             _formMain = formMain;
-            _httpApi = new HttpApi();
+            _apiApp = new ApiApp();
+
+            InitializeComponent();
         }
 
         private void UpdateFormClosing(object sender, FormClosingEventArgs e)
@@ -28,11 +30,12 @@ namespace AddApplication.Src.AllForms
 
         private void UpdateRemoveApp(object sender, EventArgs e)
         {
-            string title = Create.AsUrlEnCoded(txtTitle.Text);
-
             lblResponse.Text = "Response: Loading...";
 
-            if(_httpApi.IsApiRemovingApp(title))
+            string title = Create.AsUrlEnCoded(txtTitle.Text);
+            bool succeedded = _apiApp.Delete(title);
+
+            if (succeedded)
             {
                 lblResponse.Text = "Response: The requested title founded on the server and been deleted successfully";
             } else {

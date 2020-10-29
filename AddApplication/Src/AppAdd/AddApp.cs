@@ -18,12 +18,12 @@ namespace AddApplication.Src.AppAdd
 
         private readonly FormAppAdd _formAppAdd;
         private readonly HttpApi _httpApi;
-        private readonly ApiAddApp _apiAddApp;
+        private readonly ApiApp _apiAddApp;
 
         public AddApp(FormAppAdd formAppAdd)
         {
             _formAppAdd = formAppAdd;
-            _apiAddApp = new ApiAddApp();
+            _apiAddApp = new ApiApp();
             _httpApi = new HttpApi();
 
         }
@@ -186,7 +186,7 @@ namespace AddApplication.Src.AppAdd
 
                 _formAppAdd.RefreshAll();
                 await Task.Run(
-                    () => _apiAddApp.CreateAppAsync(application)
+                    () => _apiAddApp.AddAsync(application)
                 );
                 finished = (FinishedTasks++).ToString();
 

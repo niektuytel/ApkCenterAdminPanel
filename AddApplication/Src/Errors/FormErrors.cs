@@ -1,20 +1,21 @@
-﻿using System;
+﻿using AddApplication.Models;
+using AddApplication.Src.FormRequests;
+using AddApplication.Src.Http.Api;
+using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
-using AddApplication.Models;
-using AddApplication.Src.FormRequests;
 
 namespace AddApplication.Src.AllForms
 {
-    public partial class FormErrors: Form
+    public partial class FormErrors : Form
     {
-        private readonly FormMain _formMain;
-        private readonly HttpApi _httpApi;
-        private readonly EditString _editString;
-        private readonly Dictionary<string, List<ErrorModel>> _errors;
-
+        private readonly Dictionary<string, List<ErrorModel>> _allErrors;
         private string _errorType = "";
         private int _errorIndex = 0;
+
+        private readonly FormMain _formMain;
+        private readonly ApiError _apiError;
+        private readonly EditString _editString;
 
         public FormErrors(FormMain formMain)
         {
@@ -23,9 +24,10 @@ namespace AddApplication.Src.AllForms
             InitializeComponent();
 
             _formMain = formMain;
-            _httpApi = new HttpApi();
             _editString = new EditString();
-            _errors = _httpApi.ApiGetErrors();
+            _apiError = new ApiError();
+
+            _allErrors = _apiError.GetAll();
             _errorType = SetErrorType();
 
             DisplayTexts();
@@ -41,18 +43,18 @@ namespace AddApplication.Src.AllForms
         private void UpdateErrorType(object sender, EventArgs e)
         {
             _errorType = (sender as ComboBox).Text;
-            List<ErrorModel> errors = _errors[_errorType];
+            List<ErrorModel> errorModels = _allErrors[_errorType];
 
             bool isMatched = false;
-            foreach (string errorType in _errors.Keys)
+            foreach (string errorType in _allErrors.Keys)
             {
-                if(errorType == _errorType)
+                if (errorType == _errorType)
                 {
                     isMatched = true;
                 }
             }
 
-            if (!isMatched || errors.Count <= 0)
+            if (!isMatched || errorModels.Count <= 0)
             {
                 txtError.Text = "";
                 return;
@@ -72,10 +74,10 @@ namespace AddApplication.Src.AllForms
             }
             else if (id == "btnRemove")
             {
-                List<ErrorModel> errors = _errors[_errorType];
-                
+                List<ErrorModel> errors = _allErrors[_errorType];
+
                 // api
-                _ = _httpApi.ApiRemoveError(_errorType, errors[_errorIndex]);
+                _ = _apiError.Delete(errors[_errorIndex], _errorType);
 
                 // local
                 errors.RemoveAt(_errorIndex);
@@ -97,24 +99,25 @@ namespace AddApplication.Src.AllForms
         }
 
 
+
         private string SetErrorType()
         {
             // draw error types
-            int index_error_type = cboxErrorType.SelectedIndex;
+            int selectedIndex = cboxErrorType.SelectedIndex;
             cboxErrorType.Items.Clear();
 
-            foreach (string section_key in _errors.Keys)
+            foreach (string errorType in _allErrors.Keys)
             {
-                if(_errors[section_key].Count > 0)
+                if (_allErrors[errorType].Count > 0)
                 {
-                    index_error_type = 0;
-                    cboxErrorType.Items.Add(section_key);
+                    selectedIndex = 0;
+                    cboxErrorType.Items.Add(errorType);
                 }
             }
 
-            if (index_error_type != -1)
+            if (selectedIndex != -1)
             {
-                cboxErrorType.SelectedIndex = index_error_type;
+                cboxErrorType.SelectedIndex = selectedIndex;
             }
 
             object error_type = cboxErrorType.SelectedItem;
@@ -123,15 +126,17 @@ namespace AddApplication.Src.AllForms
 
         private void DisplayButtons()
         {
-            if(!_errors.ContainsKey(_errorType)) return;
+            if (!_allErrors.ContainsKey(_errorType)) return;
 
-            List<ErrorModel> errors = _errors[_errorType];
+            List<ErrorModel> errors = _allErrors[_errorType];
 
             // button previous
             if ((_errorIndex - 1) < 0)
             {
                 btnPrevious.Visible = false;
-            } else {
+            }
+            else
+            {
                 btnPrevious.Visible = true;
             }
 
@@ -139,7 +144,9 @@ namespace AddApplication.Src.AllForms
             if (_errorIndex < errors.Count && _errorIndex >= 0)
             {
                 btnRemove.Visible = true;
-            } else {
+            }
+            else
+            {
                 btnRemove.Visible = false;
             }
 
@@ -147,7 +154,9 @@ namespace AddApplication.Src.AllForms
             if ((_errorIndex + 1) > (errors.Count - 1))
             {
                 btnNext.Visible = false;
-            } else {
+            }
+            else
+            {
                 btnNext.Visible = true;
             }
 
@@ -155,16 +164,16 @@ namespace AddApplication.Src.AllForms
 
         private void DisplayTexts()
         {
-            if (!_errors.ContainsKey(_errorType)) return;
+            if (!_allErrors.ContainsKey(_errorType)) return;
 
-            List<ErrorModel> errors = _errors[_errorType];
+            List<ErrorModel> errors = _allErrors[_errorType];
 
-            if ( _errorIndex < errors.Count && _errorIndex >= 0)
+            if (_errorIndex < errors.Count && _errorIndex >= 0)
             {
                 ErrorModel errorModel = errors[_errorIndex];
 
                 txtError.Text = _editString.ConvertToText(errorModel.Error);
-                lblTimesError.Text = errorModel.RequestedTimes.ToString();
+                lblTimesError.Text = errorModel.GetRequestedTimes().ToString();
             }
             else
             {

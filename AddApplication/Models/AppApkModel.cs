@@ -11,12 +11,12 @@ namespace AddApplication.Models
         {
             Reviews = new ReviewsModel();
             Images = new string[] { "", "", "", "", "", "" };
-            About = new Dictionary<string, AboutTextModel>();
+            Abouts = new Dictionary<string, AboutTextModel>();
             if(FormAppAdd.StorageModel.Country != null)
             {
                 foreach (string country in FormAppAdd.StorageModel.Country)
                 {
-                    About.Add(country, new AboutTextModel());
+                    Abouts.Add(country, new AboutTextModel());
                 }
             }
 
@@ -36,7 +36,7 @@ namespace AddApplication.Models
 
         public string[] Images { get; set; }
 
-        public Dictionary<string, AboutTextModel> About { get; set; }
+        public Dictionary<string, AboutTextModel> Abouts { get; set; }
 
     }
 

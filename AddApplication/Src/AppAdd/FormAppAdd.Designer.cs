@@ -575,6 +575,9 @@
             this.cLstTypesApi.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.cLstTypesApi.CheckOnClick = true;
             this.cLstTypesApi.FormattingEnabled = true;
+            this.cLstTypesApi.Items.AddRange(new object[] {
+            "Child Environment",
+            "Non Addictive Environment"});
             this.cLstTypesApi.Location = new System.Drawing.Point(5, 16);
             this.cLstTypesApi.Name = "cLstTypesApi";
             this.cLstTypesApi.Size = new System.Drawing.Size(188, 126);

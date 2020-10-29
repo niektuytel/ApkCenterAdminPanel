@@ -16,7 +16,6 @@ namespace AddApplication.Src.AllForms
         public AppPhoneModel PhoneData;
         private readonly FormAppAdd _formAppAdd;
 
-
         public FormPhone(FormAppAdd formMain)
         {
             Icon = Properties.Resources.logo21;
@@ -248,9 +247,9 @@ namespace AddApplication.Src.AllForms
             PhoneData.LatestPegi = 0;
             UpdatePegi(pegi);
 
-            if (app.Apk.About.ContainsKey("Globally") && app.Apk.About["Globally"].Text != "")
+            if (app.Apk.Abouts.ContainsKey("Globally") && app.Apk.Abouts["Globally"].Text != "")
             {
-                UpdateAbout(app.Apk.About["Globally"].Text);
+                UpdateAbout(app.Apk.Abouts["Globally"].Text);
             }
 
             string icon = PhoneData.LatestIcon;
@@ -269,7 +268,7 @@ namespace AddApplication.Src.AllForms
             webRequest.AllowWriteStreamBuffering = true;
             webRequest.Timeout = 30000;
 
-            WebResponse response = null;
+            WebResponse response;
             try
             {
                 response = webRequest.GetResponse();
@@ -288,6 +287,14 @@ namespace AddApplication.Src.AllForms
 
             return true;
         }
+
+        public void Clean()
+        {
+            PhoneData = new AppPhoneModel();
+            Task.Run( () => UpdateAllAsync() );
+        }
+
+
 
     }
 }

@@ -1,11 +1,4 @@
-﻿using AddApplication.Utils;
-using AddApplication.Models;
-using RestSharp;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
-using System.Linq;
+﻿using System;
 
 namespace AddApplication.Src
 {
@@ -14,91 +7,6 @@ namespace AddApplication.Src
 
         public HttpApi() 
         { }
-
-        public Dictionary<string, List<ErrorModel>> ApiGetErrors()
-        {
-            string url = API.IpAddress + API.PathErrors;
-            var client = new RestClient(url);
-            var request = new RestRequest(Method.GET);
-
-            IRestResponse response = client.Execute(request);
-
-            if (!response.IsSuccessful)
-            {
-                Console.WriteLine("HttpApi:apiGetErrors(); response not successfully | <response>:" + response.ToString());
-            }
-
-            return ResponseAsErrorModels(response.Content);
-        }
-
-        public async Task ApiRemoveError(string error_type, ErrorModel error)
-        {
-            string url = API.IpAddress + API.PathErrorRemove;
-            var client = new RestClient(url);
-            var request = new RestRequest(Method.POST);
-
-            //json
-            string jsonToSend = "{ \"error_type\":\"" + error_type + "\",\"error\":\"" + error.Error + "\"}";
-            request.AddParameter("application/json; charset=utf-8", jsonToSend, ParameterType.RequestBody);
-            request.RequestFormat = DataFormat.Json;
-
-            var response = await client.ExecuteAsync(request);
-            if (response.StatusCode != System.Net.HttpStatusCode.OK)
-            {
-                Console.WriteLine("HttpApi:apiRemoveError(); response is not successfully | <response>:" + response.ToString());
-            }
-        }
-
-        public List<AppRequestModel> ApiGetRequests()
-        {
-            string url = API.IpAddress + API.PathRequests;
-            var client = new RestClient(url);
-            var request = new RestRequest(Method.GET);
-
-            IRestResponse response = client.Execute(request);
-
-            if (!response.IsSuccessful)
-            {
-                Console.WriteLine("HttpApi:apiGetRequests(); response not successfully | <response>:" + response.ToString());
-            }
-
-            return ResponseAsRequestModels(response.Content);
-        }
-
-        public async Task ApiRemoveRequest(AppRequestModel request_model)
-        {
-            string url = API.IpAddress + API.PathRequestRemove;
-            var client = new RestClient(url);
-            var request = new RestRequest(Method.POST);
-
-            //json
-            string jsonToSend = "{ \"Title\":\"" + request_model.Title + "\"}";
-            request.AddParameter("application/json; charset=utf-8", jsonToSend, ParameterType.RequestBody);
-            request.RequestFormat = DataFormat.Json;
-
-            var response = await client.ExecuteAsync(request);
-            if (response.StatusCode != System.Net.HttpStatusCode.OK)
-            {
-                Console.WriteLine("HttpApi:apiRemoveRequest(); response is not successfully | <response>:" + response.ToString());
-            }
-        }
-
-        public bool IsApiRemovingApp(string title)
-        {
-            string url = API.IpAddress + API.PathAppRemove;
-            var client = new RestClient(url);
-            var request = new RestRequest(Method.POST);
-
-            request.AddHeader("Content-Type", "application/json");
-            request.AddParameter("application/json", "{\r\n    \"Title\":\"" + title + "\"\r\n}", ParameterType.RequestBody);
-            IRestResponse response = client.Execute(request);
-
-            return response.IsSuccessful;
-        }
-
-
-
-        // below ok
 
         private const string SamplePackage =
                "POST /store/apps/details?id=com.whatsapp HTTP/1.1\r\n" +
@@ -109,43 +17,6 @@ namespace AddApplication.Src
                "Accept-Encoding: gzip, deflate\r\n" +
                "Upgrade-Insecure-Requests: 1\r\n\r\n" +
                "{\"content\":\"value\"}";
-
-
-        public Dictionary<string, List<ErrorModel>> ResponseAsErrorModels(string input)
-        {
-            // create errors
-            Dictionary<string, List<ErrorModel>> errors_list = new Dictionary<string, List<ErrorModel>>();
-
-            JObject json_errors = JObject.Parse(input);
-            IList<string> keys = json_errors.Properties().Select(p => p.Name).ToList();
-            foreach (string key in keys)
-            {
-                List<ErrorModel> errors = new List<ErrorModel>();
-                foreach (JObject item in json_errors.GetValue(key))
-                {
-                    ErrorModel err_model = new ErrorModel(item);
-                    errors.Add(err_model);
-                }
-
-                errors_list.Add(key, errors);
-            }
-
-            return errors_list;
-        }
-
-        public List<AppRequestModel> ResponseAsRequestModels(string input)
-        {
-            JArray values = JArray.Parse(input);
-
-            List<AppRequestModel> requests = new List<AppRequestModel>();
-            foreach (JObject item in values)
-            {
-                AppRequestModel request_model = new AppRequestModel(item);
-                requests.Add(request_model);
-            }
-
-            return requests;
-        }
 
         public string[] HeadersAsLines(string package)
         {

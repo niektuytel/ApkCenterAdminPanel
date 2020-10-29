@@ -1,5 +1,4 @@
 ﻿using AddApplication.Models;
-using AddApplication.Src.AllForms;
 using AddApplication.Src.Http.Api;
 using System;
 using System.Collections.Generic;
@@ -10,43 +9,35 @@ namespace AddApplication.Src.AppAdd
     class Category
     {
 
-        private readonly AppSettingsModel _storage;
         private readonly ApiCategory _apiCategory;
-        private readonly InitializeHelper _initializeHelper;
 
         public bool IsSelecting = false;
         public bool IsEditing = false;
 
         public Category()
         {
-            _storage = FormAppAdd.StorageModel;
             _apiCategory = new ApiCategory();
-            _initializeHelper = new InitializeHelper();
-
         }
 
-        public async Task<bool> RequestApi(string buttonId, CategoryModel category, int selectedIndex = -1)
+        public async Task<bool> RequestApi(string buttonId, Dictionary<string, string> categories, string selectedValue = "")
         {
-            if (category.IsInvalid()) return false;
-
-            if (buttonId.Contains("add"))
+            if (buttonId.ToLower().Contains("add"))
             {
-                if (selectedIndex != -1)
+                if (selectedValue is "")
                 {
-                    // edit
-                    CategoryModel oldModel = _storage.Categories[selectedIndex];
-                    return await _apiCategory.EditCategory(category, oldModel);
+                    // add
+                    return await _apiCategory.Add(categories);
                 }
                 else
                 {
-                    // add
-                    return await _apiCategory.AddCategory(category);
+                    // edit
+                    return await _apiCategory.Edit(categories, selectedValue);
                 }
             }
-            else if (buttonId.Contains("remove"))
+            else if (buttonId.Contains("remove") && selectedValue != "")
             {
                 // remove
-                return await _apiCategory.RemoveCategory(category);
+                return await _apiCategory.Delete(selectedValue);
             }
 
             Console.WriteLine("<buttonId>:" + buttonId + " can't been found :( | Category.cs::RequestCategory()");

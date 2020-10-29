@@ -70,11 +70,17 @@ namespace AddApplication.Src
 
             //TODO: need some way on how to handle this but idk for now
 
-            foreach (CategoryModel category in FormAppAdd.StorageModel.Categories)
+            var categories = FormAppAdd.StorageModel.AllCategories["Globally"];
+            if(categories.ContainsKey(value))
             {
-                if (category.Globally == value)
-                    categoryName = category.Globally;
+                categoryName = value;
             }
+
+            //foreach (CategoryModel category in FormAppAdd.StorageModel.AllCategories)
+            //{
+                //if (category.Globally == value)
+                    //categoryName = category.Globally;
+            //}
 
             return categoryName;
         }

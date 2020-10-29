@@ -5,20 +5,20 @@ using AddApplication.Models;
 using System.Drawing;
 using AddApplication.Src.AppAdd;
 using AddApplication.Src.Http.Api;
+using System.Linq;
 
 namespace AddApplication.Src.AllForms
 {
     public partial class FormAppAdd : Form
     {
-        public bool RefreshingUI = false;
         public static AppModel ApplicationModel;
         public static AppSettingsModel StorageModel;
+        public bool RefreshingUI = false;
 
         private readonly FormMain _formMain = null;
-        private readonly FileHelper<AppSettingsModel> _fileHelper;
+        private readonly FileHelper _fileHelper;
         private readonly FormHelper<FormAppAdd> _formHelper;
         private readonly TypenApis _typenApis;
-        private readonly Category _category;
         private readonly AddApp _addApp;
         private readonly ApiCategory _apiCategory;
         private readonly ApiCountry _apiCountry;
@@ -32,17 +32,15 @@ namespace AddApplication.Src.AllForms
         {
             Icon = Properties.Resources.logo21;
 
+            InitializeComponent();
+
             _formMain = formMain;
-            _fileHelper = new FileHelper<AppSettingsModel>();
+            _fileHelper = new FileHelper();
             _formHelper = new FormHelper<FormAppAdd>(this);
             _addApp = new AddApp(this);
-            _category = new Category();
             _typenApis = new TypenApis();
             _apiCategory = new ApiCategory();
             _apiCountry = new ApiCountry();
-
-
-            InitializeComponent();
 
             RefreshAll();
         }
@@ -183,15 +181,15 @@ namespace AddApplication.Src.AllForms
 
             if (!RefreshingUI)
             {
-                apk.About[country].Text = text;
+                apk.Abouts[country].Text = text;
             }
 
             // update form phone
             if (_formPhone != null)
             {
-                if (apk.About.ContainsKey(country))
+                if (apk.Abouts.ContainsKey(country))
                 {
-                    _formPhone.UpdateAbout(apk.About[country].Text);
+                    _formPhone.UpdateAbout(apk.Abouts[country].Text);
                 }
             }
 
@@ -204,24 +202,24 @@ namespace AddApplication.Src.AllForms
             string country = cbbAboutCountry.SelectedItem.ToString();
             txtAbout.Visible = true;
 
-            if (apk.About.ContainsKey(country))
+            if (apk.Abouts.ContainsKey(country))
             {
-                txtAbout.Text = apk.About[country].Text;
+                txtAbout.Text = apk.Abouts[country].Text;
             } else {
                 txtAbout.Text = "";
             }
 
             if (!RefreshingUI)
             {
-                apk.About[country].Text = _addApp.RefreshData(apk.About[country].Text, txtAbout);
+                apk.Abouts[country].Text = _addApp.RefreshData(apk.Abouts[country].Text, txtAbout);
             }
 
             if (_formPhone != null)
             {
                 // update form phone
-                if (apk.About.ContainsKey(country))
+                if (apk.Abouts.ContainsKey(country))
                 {
-                    _formPhone.UpdateAbout(apk.About[country].Text);
+                    _formPhone.UpdateAbout(apk.Abouts[country].Text);
                 }
             }
 
@@ -333,11 +331,11 @@ namespace AddApplication.Src.AllForms
 
             if (!RefreshingUI)
             {
-                ApplicationModel.Popular = new List<string>();
+                ApplicationModel.Populars = new List<string>();
                 foreach (object itemChecked in (sender as CheckedListBox).CheckedItems)
                 {
                     string item = (string)itemChecked;
-                    ApplicationModel.Popular.Add(item);
+                    ApplicationModel.Populars.Add(item);
                 }
 
                 (sender as CheckedListBox).ClearSelected();
@@ -383,14 +381,14 @@ namespace AddApplication.Src.AllForms
         public void RefreshAll()
         {
             StorageModel = _fileHelper.ReadJson(FormAppSettings.FileStorage, new AppSettingsModel());
-            StorageModel.Categories = _apiCategory.Categories();
-            StorageModel.Country = _apiCountry.Countries();
+            StorageModel.AllCategories = _apiCategory.GetAll();
+            StorageModel.Country = _apiCountry.GetAll();
 
             ApplicationModel = new AppModel();
 
             RefreshUI();
             RefreshLists();
-            RefreshPhone();
+            if(_formPhone != null) _formPhone.Clean();
 
             _autoFill = new AutoFill(this);
         }
@@ -436,12 +434,12 @@ namespace AddApplication.Src.AllForms
                     cbbPegi.SelectedItem = apk.Pegi.ToString();
 
                 if (
-                    apk.About.ContainsKey("Globally") &&
-                    apk.About["Globally"].Text != "" &&
-                    apk.About["Globally"].Text != null
+                    apk.Abouts.ContainsKey("Globally") &&
+                    apk.Abouts["Globally"].Text != "" &&
+                    apk.Abouts["Globally"].Text != null
                 )
                 {
-                    txtAbout.Text = apk.About[cbbAboutCountry.SelectedItem.ToString()].Text;
+                    txtAbout.Text = apk.Abouts[cbbAboutCountry.SelectedItem.ToString()].Text;
                 }
             }
             RefreshingUI = false;
@@ -449,7 +447,7 @@ namespace AddApplication.Src.AllForms
 
         public void RefreshLists()
         {
-            string[] categoryNames = _category.ModelToString(StorageModel.Categories);
+            string[] categoryNames = StorageModel.AllCategories["Globally"].Keys.ToArray();
             string[] apiNames = _typenApis.ModelToString(StorageModel.ApiTypes);
 
             _formHelper.DisplayList(categoryNames, cbbCategory);
@@ -478,34 +476,9 @@ namespace AddApplication.Src.AllForms
             {
                 cLstPopular.SetItemChecked(0, true);
                 string value = cLstPopular.Items[0].ToString();
-                ApplicationModel.Popular = new List<string>() { value };
+                ApplicationModel.Populars = new List<string>() { value };
             }
 
-        }
-
-        private void RefreshPhone()
-        {
-            if (cbFormPhone.Checked)
-            {
-                int current_x = 20;
-                int current_y = 20;
-
-                if (_formPhone != null)
-                {
-                    current_x = _formPhone.Location.X;
-                    current_y = _formPhone.Location.Y;
-
-                    _formPhone.Close();
-                }
-
-                // location
-                _formPhone.WindowState = FormWindowState.Normal;
-                _formPhone.StartPosition = FormStartPosition.Manual;
-                _formPhone.BringToFront();
-                _formPhone.Location = new Point(current_x, current_y);
-
-                _formPhone.Show();
-            }
         }
 
     }

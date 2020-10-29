@@ -1,6 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Forms;
-using AddApplication.Models;
 using AddApplication.Src.AppAdd;
 
 namespace AddApplication.Src.AllForms
@@ -8,25 +9,21 @@ namespace AddApplication.Src.AllForms
     public partial class FormAppSettings : Form
     {
         public const string FileStorage = "./Storage/settings.json";
+        private readonly Category _category;
 
         private readonly FormAppAdd _formAppAdd;
-        private readonly FileHelper<AppSettingsModel> _fileHelper;
         private readonly FormHelper<FormAppAdd> _formHelper;
-        private readonly Category _category;
-        private readonly TypenApis _typenApis;
 
         public FormAppSettings(FormAppAdd formAppAdd)
         {
             Icon = Properties.Resources.logo21;
             _formAppAdd = formAppAdd;
-            _fileHelper = new FileHelper<AppSettingsModel>();
-            _formHelper = new FormHelper<FormAppAdd>(formAppAdd);
             _category = new Category();
-            _typenApis = new TypenApis();
+            _formHelper = new FormHelper<FormAppAdd>(formAppAdd);
 
             InitializeComponent();
 
-            RefreshAll();            
+            RefreshCategory();            
         }
 
         private void Form_Closing(Object sender, FormClosingEventArgs e)
@@ -36,43 +33,64 @@ namespace AddApplication.Src.AllForms
 
         private async void Categories_ButtonClicked(object sender, EventArgs e)
         {
-            int index = lstCategories.SelectedIndex;
             string id = (sender as Button).Name.ToLower();
+            var itemIndex = lstCategories.SelectedIndex;
+            var categorySection = FormAppAdd.StorageModel.AllCategories;
 
-            CategoryModel model = new CategoryModel
+            Dictionary<string, string> countryValues = new Dictionary<string, string>
             {
-                Globally = txtGlobally.Text,
-                Nederland = txtNederland.Text
+                { "Globally", txtGlobally.Text },// required
+                { "Nederland", txtNederland.Text }
+
+                // Add here the rest of the country values that will been added in future times
+
             };
 
-            //update data
+            // protection
+            if (countryValues["Globally"] is "") return;
+
+
+
             _category.IsSelecting = true;
             {
+                txtGlobally.Text = "";//required
                 txtNederland.Text = "";
-                txtGlobally.Text = "";
+                
+                // Add here the rest of the country values that will been added in future times
+
                 lstCategories.ClearSelected();
 
                 // api
-                bool ok = await _category.RequestApi(id, model, index);
-                if (!ok) return;
-
-                if(id.ToLower().Contains("add"))
+                string currentItem = "";
+                if (itemIndex != -1)
                 {
-                    if(index is -1)
-                    {
-                        FormAppAdd.StorageModel.UpdateCategories(model);//add
-                    }
-                    else
-                    {
-                        FormAppAdd.StorageModel.Categories[index] = model;// edit
-                        FormAppAdd.StorageModel.UpdateCategories();
-                    }
-                } else if (index != -1) {
-                    FormAppAdd.StorageModel.Categories[index].Globally = "";// remove
-                    FormAppAdd.StorageModel.UpdateCategories();
+                    currentItem = categorySection["Globally"].ElementAt(itemIndex).Key;
                 }
 
-                _fileHelper.WriteJson(FileStorage, FormAppAdd.StorageModel);
+                bool ok = await _category.RequestApi(id, countryValues, currentItem);
+                if (!ok) return;
+                
+
+
+                string globallyValue = countryValues["Globally"];
+                foreach (KeyValuePair<string, string> countrySection in countryValues)
+                {
+                    // local
+                    if (id.ToLower().Contains("add"))
+                    {
+                        if ( itemIndex != -1)
+                        {
+                            categorySection[countrySection.Key].Remove(currentItem);
+                        }
+
+                        categorySection[countrySection.Key].Add(globallyValue, countrySection.Value);
+                    }
+                    else if ( itemIndex != -1)
+                    {
+                        categorySection[countrySection.Key].Remove(currentItem);
+                    }
+                }
+
                 _formAppAdd.RefreshLists();
                 RefreshCategory();
             }
@@ -81,15 +99,18 @@ namespace AddApplication.Src.AllForms
 
         private void Categories_Selected(object sender, EventArgs e)
         {
-            int index = (sender as ListBox).SelectedIndex;
+            var categorySection = FormAppAdd.StorageModel.AllCategories;
+            int index = lstCategories.SelectedIndex;
+
             if (index == -1 || _category.IsEditing) return;
+            string value = lstCategories.SelectedItem.ToString();
 
-             _category.IsSelecting = true;
+            _category.IsSelecting = true;
             {
+                txtGlobally.Text = categorySection["Globally"][value];//required
+                txtNederland.Text = categorySection["Nederland"][value];
 
-                CategoryModel model = FormAppAdd.StorageModel.Categories[index];
-                txtGlobally.Text = model.Globally;
-                txtNederland.Text = model.Nederland;
+                // Add here the rest of the country values that will been added in future times
 
             }
             _category.IsSelecting = false;
@@ -102,115 +123,18 @@ namespace AddApplication.Src.AllForms
 
             _category.IsEditing = true;
             {
-
-                CategoryModel model = new CategoryModel
-                {
-                    Globally = txtGlobally.Text,
-                    Nederland = txtNederland.Text
-                };
-                lstCategories.Items[index] = model.Globally;
+                lstCategories.Items[index] = txtGlobally.Text;
             }
             _category.IsEditing = false;
         }
 
-
-        private void ApiTypes_ButtonClicked(object sender, EventArgs e)
-        {
-
-            string id = (sender as Button).Name;
-            int index = lstApis.SelectedIndex;
-
-            ApiTypeModel model = new ApiTypeModel
-            {
-                ApiName = txtApiName.Text,
-                ApiPath = txtApiPath.Text
-            };
-
-            //update data
-            _category.IsSelecting = true;
-            {
-                txtApiName.Text = "";
-                txtApiPath.Text = "";
-                lstApis.ClearSelected();
-
-                if (id.ToLower().Contains("add"))
-                {
-                    if (index is -1)
-                    {
-                        FormAppAdd.StorageModel.UpdateApiTypes(model);//add
-                    }
-                    else
-                    {
-                        FormAppAdd.StorageModel.ApiTypes[index] = model;// edit
-                        FormAppAdd.StorageModel.UpdateApiTypes();
-                    }
-                }
-                else if (index != -1)
-                {
-                    FormAppAdd.StorageModel.ApiTypes[index].ApiName = "";// remove
-                    FormAppAdd.StorageModel.UpdateApiTypes();
-                }
-
-                // save
-                _fileHelper.WriteJson(FileStorage, FormAppAdd.StorageModel);
-                _formAppAdd.RefreshLists();
-                RefreshTypenApis();
-            }
-            _category.IsSelecting = false;
-        }
-
-        private void ApiTypes_Selected(object sender, EventArgs e)
-        {
-            int index = (sender as ListBox).SelectedIndex;
-            if (index == -1 || _typenApis.IsEditing) return;
-
-            _typenApis.IsSelecting = true;
-            {
-
-                ApiTypeModel model = FormAppAdd.StorageModel.ApiTypes[index];
-                txtApiName.Text = model.ApiName;
-                txtApiPath.Text = model.ApiPath;
-    
-            }
-            _typenApis.IsSelecting = false;
-        }
-
-        private void ApiTypes_EditText(object sender, EventArgs e)
-        {
-            int index = lstApis.SelectedIndex;
-            if (index == -1 || _typenApis.IsSelecting) return;
-
-            _typenApis.IsEditing = true;
-            {
-
-                ApiTypeModel model = FormAppAdd.StorageModel.ApiTypes[index];
-                model.ApiName = txtApiName.Text;
-                model.ApiPath = txtApiPath.Text;
-
-                lstApis.Items[index] = model.ApiName;
-
-            }
-            _typenApis.IsEditing = false;
-
-        }
-
-        // NO Events
-        private void RefreshAll()
-        {
-            RefreshCategory();
-            RefreshTypenApis();
-        }
-
         private void RefreshCategory()
         {
-            string[] categories = _category.ModelToString(FormAppAdd.StorageModel.Categories);
-            _formHelper.DisplayList(categories, lstCategories);
-        }
+            var categorySection = FormAppAdd.StorageModel.AllCategories;
+            if (!categorySection.ContainsKey("Globally")) return;
 
-        private void RefreshTypenApis()
-        {
-            string[] apiTypes = _typenApis.ModelToString(FormAppAdd.StorageModel.ApiTypes);
-            _formHelper.DisplayList(apiTypes, lstApis);
+            var categoryKeys = categorySection["Globally"].Keys.ToArray();
+            _formHelper.DisplayList(categoryKeys, lstCategories);
         }
 
     }

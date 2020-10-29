@@ -9,7 +9,7 @@ namespace AddApplication.Models
             Category = "";
             Website = new AppWebsiteModel();
             Apk = new AppApkModel();
-            Popular = new List<string>();
+            Populars = new List<string>();
             TypenApis = new List<string>();
         }
 
@@ -23,7 +23,7 @@ namespace AddApplication.Models
 
         public List<string> Types { get; set; }
 
-        public List<string> Popular { get; set; }
+        public List<string> Populars { get; set; }
 
         public List<string> TypenApis { get; set; }
 

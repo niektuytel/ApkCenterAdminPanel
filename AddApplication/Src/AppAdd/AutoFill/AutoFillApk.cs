@@ -171,10 +171,10 @@ namespace AddApplication.Src
                     foreach (KeyValuePair<string, string> country_item in supportedCountries)
                     {
                         // add new element
-                        if (!application.Apk.About.ContainsKey(country_item.Key))
-                            application.Apk.About.Add(country_item.Key, new AboutTextModel());
+                        if (!application.Apk.Abouts.ContainsKey(country_item.Key))
+                            application.Apk.Abouts.Add(country_item.Key, new AboutTextModel());
 
-                        if (application.Apk.About[country_item.Key].Text != value)
+                        if (application.Apk.Abouts[country_item.Key].Text != value)
                         {
                             // request new packages (if not currentCountry)
                             if (country_item.Key != currentCountry)
@@ -189,7 +189,7 @@ namespace AddApplication.Src
                             string guess_about = GuessAbout();
                             if(guess_about != "" && !Matched(guess_about, _suggestedModel.About["apk"]) && !Matched(guess_about, _suggestedModel.About["website"]))
                             {
-                                application.Apk.About[country_item.Key].Text = guess_about;
+                                application.Apk.Abouts[country_item.Key].Text = guess_about;
                                 _suggestedModel.About["apk"].Add(guess_about);
                                 hasInfo = true;
                             }
@@ -198,8 +198,8 @@ namespace AddApplication.Src
 
                     //remove duplicate
                     {
-                        var globallyAbout = application.Apk.About["Globally"];
-                        var nederlandAbout = application.Apk.About["Nederland"];
+                        var globallyAbout = application.Apk.Abouts["Globally"];
+                        var nederlandAbout = application.Apk.Abouts["Nederland"];
 
                         if(globallyAbout.Text != null && nederlandAbout.Text != null)
                         {
@@ -304,11 +304,15 @@ namespace AddApplication.Src
             }
 
             //check
-            foreach (CategoryModel category in FormAppAdd.StorageModel.Categories)
+            var categories = FormAppAdd.StorageModel.AllCategories["Globally"];
+            foreach (string category in categories.Keys)
             {
-                if (value.ToLower().Contains(category.Globally.ToLower()))
-                    return category.Globally;
+                if (value.ToLower().Contains(category.ToLower()))
+                {
+                    return category;
+                }
             }
+
             return "";
         }
 

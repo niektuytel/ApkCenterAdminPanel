@@ -10,7 +10,7 @@ namespace AddApplication.Src.Http.Api
         public ApiCountry()
         { }
 
-        public string[] Countries()
+        public string[] GetAll()
         {
             string url = API.IpAddress + API.PathCountries;
 

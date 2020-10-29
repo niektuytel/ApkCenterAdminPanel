@@ -1,8 +1,7 @@
-﻿using AddApplication.Models;
-using AddApplication.Utils;
+﻿using AddApplication.Utils;
 using Newtonsoft.Json;
 using RestSharp;
-using System.Net;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace AddApplication.Src.Http.Api
@@ -10,10 +9,13 @@ namespace AddApplication.Src.Http.Api
     class ApiCategory
     {
 
+        private readonly FileHelper _fileHelper;
         public ApiCategory()
-        { }
+        {
+            _fileHelper = new FileHelper();
+        }
 
-        public CategoryModel[] Categories()
+        public Dictionary<string, Dictionary<string, string>> GetAll()
         {
             string url = API.IpAddress + API.PathCategories;
 
@@ -22,54 +24,49 @@ namespace AddApplication.Src.Http.Api
 
             IRestResponse response = client.Execute(request);
 
-            CategoryModel[] values = null;
+            var values = new Dictionary<string, Dictionary<string, string>>();
             if (response.IsSuccessful)
             {
-                values = JsonConvert.DeserializeObject<CategoryModel[]>(response.Content);
+                values = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, string>>>(response.Content);
             }
 
             return values;
         }
 
-        public async Task<bool> AddCategory(CategoryModel model)
+        public async Task<bool> Add(Dictionary<string, string> body)
         {
+            if (!body.ContainsKey("Globally")) return false;
             string url = API.IpAddress + API.PathCategoryAdd;
-            string jsonToSend = JsonConvert.SerializeObject(model);
+
+            return await AddCategory(url, body);
+        }
+
+        public async Task<bool> Edit(Dictionary<string,string> body, string selectedValue)
+        {
+            string url = API.IpAddress + API.PathCategoryEdit + selectedValue;
+            return await AddCategory(url, body);
+        }
+
+        public async Task<bool> Delete(string category)
+        {
+            category = Create.AsUrlEnCoded(category);
+            string url = API.IpAddress + API.PathCategoryRemove + category;
 
             var client = new RestClient(url);
-            var request = new RestRequest(Method.POST);
-            request.AddParameter("application/json; charset=utf-8", jsonToSend, ParameterType.RequestBody);
-            request.RequestFormat = DataFormat.Json;
+            var request = new RestRequest(Method.DELETE);
 
             IRestResponse response = await client.ExecuteAsync(request);
             return response.IsSuccessful;
         }
 
-        public async Task<bool> EditCategory(CategoryModel model, CategoryModel oldModel)
+        private async Task<bool> AddCategory(string url, Dictionary<string, string> body)
         {
-            CategoryModel[] dataModel = new CategoryModel[2];
-            dataModel[0] = oldModel;
-            dataModel[1] = model;
-
-            string url = API.IpAddress + API.PathCategoryEdit;
-            string jsonToSend = JsonConvert.SerializeObject(dataModel);
+            string jsonData = _fileHelper.DataToJson(body);
 
             var client = new RestClient(url);
             var request = new RestRequest(Method.POST);
-            request.AddParameter("application/json; charset=utf-8", jsonToSend, ParameterType.RequestBody);
+            request.AddParameter("application/json; charset=utf-8", jsonData, ParameterType.RequestBody);
             request.RequestFormat = DataFormat.Json;
-
-            IRestResponse response = await client.ExecuteAsync(request);
-            return response.IsSuccessful;
-        }
-
-        public async Task<bool> RemoveCategory(CategoryModel model)
-        {
-            string name = Create.AsUrlEnCoded(model.Globally);
-            string url = API.IpAddress + API.PathCategoryRemove + "?name=" + name;
-
-            var client = new RestClient(url);
-            var request = new RestRequest(Method.GET);
 
             IRestResponse response = await client.ExecuteAsync(request);
             return response.IsSuccessful;

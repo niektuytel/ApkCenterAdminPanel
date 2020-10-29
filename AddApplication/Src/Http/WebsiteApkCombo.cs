@@ -32,7 +32,7 @@ namespace AddApplication.Src.FormRequests
             model.Apk.Reviews.Amount = guessReviewAmount(response_content);
             model.Apk.Url = url_page;
             model.Apk.Pegi = guessPegi(response_content);
-            model.Apk.About = guessAbout(response_content);
+            model.Apk.Abouts = guessAbout(response_content);
 
             return model;
         }
