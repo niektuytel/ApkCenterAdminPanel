@@ -1,7 +1,8 @@
 # ApkCenter Admin Panel
 
-Admin panel for apk center app
-about this project more but this essentially a project to build a non addictive android device and a child safe enviroment
+This is the panel where the admin can `add/edit/delete` applications and categories.
+- window that shows the requested apps that the user wants to have.
+- window that shows the errors the apkcenter app have on the user side
 
 TODOS:
 - Make Languages more flexible (add/edit/delete)
