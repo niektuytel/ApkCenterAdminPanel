@@ -1,4 +1,4 @@
-# ApkCenter Admin Panel
+# ApkCenter Admin Panel DEPRECATED
 
 This is the panel where the admin can `add/edit/delete` applications and categories.
 - window that shows the requested apps that the user wants to have.
